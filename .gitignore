@@ -97,3 +97,9 @@ InitTestScene*.unity*
 
 # Auto-generated scenes by play mode tests
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
+
+# Ignore custom helper batch file
+activate_venv.bat
+
+# Ignore Virtual Environment
+/venv

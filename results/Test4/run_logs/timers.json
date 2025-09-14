@@ -1,0 +1,54 @@
+{
+    "name": "root",
+    "metadata": {
+        "timer_format_version": "0.1.0",
+        "start_time_seconds": "1757706857",
+        "python_version": "3.9.13 (tags/v3.9.13:6de2ca5, May 17 2022, 16:36:42) [MSC v.1929 64 bit (AMD64)]",
+        "command_line_arguments": "D:\\4Gamix\\Unity\\Unity 6\\Machine_Learning_Snake\\venv\\Scripts\\mlagents-learn --run-id=Test4 --resume",
+        "mlagents_version": "0.30.0",
+        "mlagents_envs_version": "0.30.0",
+        "communication_protocol_version": "1.5.0",
+        "pytorch_version": "2.8.0+cpu",
+        "numpy_version": "1.21.2",
+        "end_time_seconds": "1757706869"
+    },
+    "total": 12.0200783,
+    "count": 1,
+    "self": 0.010086199999999934,
+    "children": {
+        "run_training.setup": {
+            "total": 0.044682599999999795,
+            "count": 1,
+            "self": 0.044682599999999795
+        },
+        "TrainerController.start_learning": {
+            "total": 11.9653095,
+            "count": 1,
+            "self": 9.220000000098594e-05,
+            "children": {
+                "TrainerController._reset_env": {
+                    "total": 11.745440199999999,
+                    "count": 1,
+                    "self": 11.745440199999999
+                },
+                "trainer_threads": {
+                    "total": 7.999999986907369e-07,
+                    "count": 1,
+                    "self": 7.999999986907369e-07
+                },
+                "TrainerController._save_models": {
+                    "total": 0.21977630000000126,
+                    "count": 1,
+                    "self": 0.0011261000000004628,
+                    "children": {
+                        "RLTrainer._checkpoint": {
+                            "total": 0.2186502000000008,
+                            "count": 1,
+                            "self": 0.2186502000000008
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
