@@ -13,6 +13,8 @@ public class Cell
 
     public Vector2Int nextDirection;
 
+    public bool isOccupied = false;
+
     public Cell(Vector3 position)
     {
         this.position = position;

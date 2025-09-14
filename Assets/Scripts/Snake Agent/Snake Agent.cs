@@ -29,6 +29,7 @@ public class SnakeAgent : Agent
     private bool directionChanged = false;
 
     public Cell currentCell;
+    public Cell previousCell;
 
     [SerializeField] private float moveDelay = 0.2f; // Time between moves (seconds)
     private float moveTimer = 0f;
@@ -139,6 +140,42 @@ public class SnakeAgent : Agent
         cumulativeReward = GetCumulativeReward();
     }
 
+    private void Update()
+    {
+        moveTimer += Time.deltaTime;
+        if (moveTimer < moveDelay)
+        {
+            return; // Skip movement until delay is met
+        }
+
+        if (gridManager.grid.InBounds(currentCell.gridPosition + _currentDirection))
+        {
+            previousCell = currentCell;
+            currentCell = gridManager.grid[currentCell.gridPosition + _currentDirection];
+            currentCell.isOccupied = true;
+        }
+            
+
+        transform.localPosition = currentCell.position + new Vector3(0, 0.15f, 0);
+
+        foreach (Tail tail in tails)
+        {
+            tail.UpdateRotation(tail.currentCell.nextDirection);
+            if (gridManager.grid.InBounds(tail.currentCell.gridPosition + tail.currentCell.nextDirection))
+            {
+                tail.previousCell = tail.currentCell;
+                tail.currentCell = gridManager.grid[tail.currentCell.gridPosition + tail.currentCell.nextDirection];
+                tail.currentCell.isOccupied = true;
+            }
+                
+
+            tail.transform.localPosition = tail.currentCell.position + new Vector3(0, 0.15f, 0);
+        }
+
+        UpdateRotation(_currentDirection);
+        moveTimer = 0;
+    }
+
     public void MoveAgent(ActionSegment<int> actions)
     {
         var action = actions[0];
@@ -160,41 +197,13 @@ public class SnakeAgent : Agent
                 break;
         }
 
-
         // Prevent reversing direction
         if (requestedDirection + _currentDirection != Vector2Int.zero)
         {
+            
             _currentDirection = requestedDirection;
             currentCell.nextDirection = _currentDirection;
         }
-
-        // Timer logic
-        moveTimer += Time.deltaTime;
-        if (moveTimer < moveDelay)
-        {
-            return; // Skip movement until delay is met
-        }
-
-        if (gridManager.grid.InBounds(currentCell.gridPosition + _currentDirection))
-            currentCell = gridManager.grid[currentCell.gridPosition + _currentDirection];
-
-        transform.localPosition = currentCell.position + new Vector3(0, 0.15f, 0);
-        //UpdateCellDirection();
-
-        foreach (Tail tail in tails)
-        {
-            tail.UpdateRotation(tail.currentCell.nextDirection);
-            if (gridManager.grid.InBounds(tail.currentCell.gridPosition + tail.currentCell.nextDirection))
-                tail.currentCell = gridManager.grid[tail.currentCell.gridPosition + tail.currentCell.nextDirection];
-
-            tail.transform.localPosition = tail.currentCell.position + new Vector3(0, 0.15f, 0);
-            
-
-        }
-
-        UpdateRotation(_currentDirection);
-        moveTimer = 0;
-
 
     }
 
@@ -217,6 +226,7 @@ public class SnakeAgent : Agent
     {
         foreach (Cell cell in gridManager.grid.data)
         {
+            if(!cell.isOccupied) continue;
             if (tails.Count == 0) cell.nextDirection = _currentDirection;
             else cell.nextDirection = tails.Last().currentCell.nextDirection;
         }
@@ -251,7 +261,8 @@ public class SnakeAgent : Agent
     {
         if(tails.Count == 0)
         {
-            Cell tailCell = gridManager.grid[currentCell.gridPosition - _currentDirection];
+            Cell tailCell = previousCell;
+            tailCell.nextDirection = previousCell.nextDirection;
             GameObject tailObj = Instantiate(tailGameObject, tailCell.position + new Vector3(0, 0.15f, 0), Quaternion.identity);
             tailObj.transform.localRotation = transform.localRotation;
             Tail tail = tailObj.GetComponent<Tail>();
