@@ -434,7 +434,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4529495500772945087, guid: da9e349e39757634da345dba339cd908, type: 3}
       propertyPath: m_Center.z
-      value: -0.07
+      value: -0.13
       objectReference: {fileID: 0}
     - target: {fileID: 4765245273980914322, guid: da9e349e39757634da345dba339cd908, type: 3}
       propertyPath: m_LocalScale.x
@@ -453,8 +453,12 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5220882285072244407, guid: da9e349e39757634da345dba339cd908, type: 3}
+      propertyPath: m_UseGravity
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5220882285072244407, guid: da9e349e39757634da345dba339cd908, type: 3}
       propertyPath: m_Constraints
-      value: 84
+      value: 80
       objectReference: {fileID: 0}
     - target: {fileID: 6851156697444156379, guid: da9e349e39757634da345dba339cd908, type: 3}
       propertyPath: m_TagString
@@ -506,11 +510,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7509293445774873569, guid: da9e349e39757634da345dba339cd908, type: 3}
       propertyPath: m_BehaviorType
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7509293445774873569, guid: da9e349e39757634da345dba339cd908, type: 3}
       propertyPath: m_BrainParameters.VectorObservationSize
       value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 7509293445774873569, guid: da9e349e39757634da345dba339cd908, type: 3}
+      propertyPath: 'm_BrainParameters.VectorActionSize.Array.data[0]'
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7509293445774873569, guid: da9e349e39757634da345dba339cd908, type: 3}
+      propertyPath: 'm_BrainParameters.m_ActionSpec.BranchSizes.Array.data[0]'
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 7816210945413620629, guid: da9e349e39757634da345dba339cd908, type: 3}
       propertyPath: m_LocalPosition.x
@@ -696,7 +708,7 @@ MonoBehaviour:
   currentEpisode: 0
   cumulativeReward: 0
   gridManager: {fileID: 8148714737050665385}
-  moveDelay: 0.2
+  moveDelay: 5
   tails: []
   tailGameObject: {fileID: 1753963514564157001, guid: 05d93c16f9c4fe748915ca4e446699be, type: 3}
   Environment: {fileID: 841133749}

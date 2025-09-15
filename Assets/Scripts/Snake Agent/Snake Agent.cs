@@ -69,7 +69,7 @@ public class SnakeAgent : Agent
         foreach (Tail tail in tails)
         {
             Destroy(tail.gameObject);
-            behaviorParameters.BrainParameters.VectorObservationSize -= 2;
+            //behaviorParameters.BrainParameters.VectorObservationSize -= 2;
         }
         tails.Clear();
 
@@ -134,14 +134,14 @@ public class SnakeAgent : Agent
         float gridHalfX = gridManager.size.x * gridManager.cellSize / 2f;
         float gridHalfZ = gridManager.size.y * gridManager.cellSize / 2f;
 
-        float foodPoxX_normalized = (_food.localPosition.x - gridCenterX) / gridHalfX;
-        float foodPoxZ_normalized = (_food.localPosition.z - gridCenterZ) / gridHalfZ;
+        float foodPoxX_normalized = _food.localPosition.x / gridManager.size.x;
+        float foodPoxZ_normalized = _food.localPosition.z / gridManager.size.y;
 
-        float poisonPoxX_normalized = (_poison.localPosition.x - gridCenterX) / gridHalfX;
-        float poisonPoxZ_normalized = (_poison.localPosition.z - gridCenterZ) / gridHalfZ;
+        float poisonPoxX_normalized = _poison.localPosition.x / gridManager.size.x;
+        float poisonPoxZ_normalized = _poison.localPosition.z / gridManager.size.y;
 
-        float snakePosX_normalized = (transform.localPosition.x - gridCenterX) / gridHalfX;
-        float snakePosZ_normalized = (transform.localPosition.z - gridCenterZ) / gridHalfZ;
+        float snakePosX_normalized = transform.localPosition.x / gridManager.size.x;
+        float snakePosZ_normalized = transform.localPosition.z / gridManager.size.y;
 
         float snakeRotationY_normalized = (transform.localEulerAngles.y / 360f) * 2f - 1f;
 
@@ -153,7 +153,29 @@ public class SnakeAgent : Agent
         sensor.AddObservation(snakePosZ_normalized);
         sensor.AddObservation(snakeRotationY_normalized);
 
-        foreach(Tail tail in tails)
+        // Direction vector to food (normalized)
+        Vector3 toFood = _food.localPosition - transform.localPosition;
+        sensor.AddObservation(toFood.normalized);
+
+        // Current moving direction
+        sensor.AddObservation(_currentDirection);
+
+        float distanceToLeftWall = transform.localPosition.x / gridManager.size.x;
+        float distanceToRightWall = (gridManager.size.x - transform.localPosition.x) / gridManager.size.x;
+        float distanceToBottomWall = transform.localPosition.z / gridManager.size.y;
+        float distanceToTopWall = (gridManager.size.y - transform.localPosition.z) / gridManager.size.y;
+
+        sensor.AddObservation(distanceToLeftWall);    // distance to left wall
+        sensor.AddObservation(distanceToRightWall);   // distance to right wall
+        sensor.AddObservation(distanceToBottomWall);  // distance to bottom wall
+        sensor.AddObservation(distanceToTopWall);     // distance to top wall
+
+
+
+
+
+
+        /*foreach(Tail tail in tails)
         {
             if(tail.isObserved) continue;
 
@@ -163,7 +185,7 @@ public class SnakeAgent : Agent
             sensor.AddObservation(tailPosZ_normalized);
             tail.isObserved = true;
             behaviorParameters.BrainParameters.VectorObservationSize += 2;
-        }
+        }*/
     }
 
     public override void OnActionReceived(ActionBuffers actions)
@@ -184,6 +206,7 @@ public class SnakeAgent : Agent
         if (timeSinceLastFood > maxTimeWithoutFood)
         {
             AddReward(-5f); // Penalize for starving
+            timeSinceLastFood = 0f; // Reset timer
         }
 
         if (moveTimer < moveDelay)
@@ -202,7 +225,7 @@ public class SnakeAgent : Agent
         }
             
 
-        transform.localPosition = currentCell.position + new Vector3(0, 0.15f, 0);
+        transform.localPosition = currentCell.position + new Vector3(0, 0.5f, 0);
 
         foreach (Tail tail in tails)
         {
@@ -215,7 +238,7 @@ public class SnakeAgent : Agent
             }
                 
 
-            tail.transform.localPosition = tail.currentCell.position + new Vector3(0, 0.15f, 0);
+            tail.transform.localPosition = tail.currentCell.position + new Vector3(0, 0.5f, 0);
         }
 
         UpdateRotation(_currentDirection);
@@ -225,6 +248,11 @@ public class SnakeAgent : Agent
     public void MoveAgent(ActionSegment<int> actions)
     {
         var action = actions[0];
+
+        if (moveTimer < moveDelay)
+        {
+            return; // Skip movement until delay is met
+        }
 
         switch (action)
         {
@@ -286,7 +314,7 @@ public class SnakeAgent : Agent
         }
         else if (other.CompareTag("Poison"))
         {
-            SetReward(-5f);
+            AddReward(-5f);
             SpawnObjects();
         }
         
@@ -296,13 +324,13 @@ public class SnakeAgent : Agent
     {
         if (collision.gameObject.CompareTag("wall"))
         {
-            SetReward(-10f);
-            _renderer.material.color = Color.red;
-            EndEpisode();
+            AddReward(-10f);
+            Debug.Log("wall");
+            //EndEpisode();
         }
         else if (collision.gameObject.CompareTag("Tail"))
         {
-            SetReward(-1f);
+            AddReward(-1f);
             EndEpisode();
         }
     }
@@ -335,13 +363,13 @@ public class SnakeAgent : Agent
         
     }
 
-    public void OnCollisionStay(Collision collision)
+    /*public void OnCollisionStay(Collision collision)
     {
         if (collision.gameObject.CompareTag("wall"))
         {
             AddReward(-0.01f * Time.fixedDeltaTime);
         }
-    }
+    }*/
 
     private void OnCollisionExit(Collision collision)
     {

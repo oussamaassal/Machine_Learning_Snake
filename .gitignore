@@ -103,3 +103,9 @@ activate_venv.bat
 
 # Ignore Virtual Environment
 /venv
+
+# Ignore Recordings
+/Recordings
+
+# Ignore Results
+/results
