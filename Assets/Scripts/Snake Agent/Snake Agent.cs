@@ -6,9 +6,11 @@ using UnityEngine.InputSystem;
 using System.Collections;
 using System.Linq;
 using System.Collections.Generic;
+using Unity.MLAgents.Policies;
 
 public class SnakeAgent : Agent
 {
+
     [SerializeField] private Transform _food;
     [SerializeField] private Transform _poison;
     [SerializeField] private Renderer _groundRenderer;
@@ -26,6 +28,8 @@ public class SnakeAgent : Agent
     [SerializeField] public GridManager gridManager;
 
     private Vector2Int _currentDirection = Vector2Int.up; // Default: up
+    private Vector2Int _queuedDirection = Vector2Int.up;
+    private Vector2Int _requestedDirection = Vector2Int.up;
     private bool directionChanged = false;
 
     public Cell currentCell;
@@ -37,12 +41,20 @@ public class SnakeAgent : Agent
     public List<Tail> tails;
     public GameObject tailGameObject;
 
+    public GameObject Environment;
+
+    public BehaviorParameters behaviorParameters;
+
+    [SerializeField] private float maxTimeWithoutFood = 10f; // seconds
+    private float timeSinceLastFood = 0f;
+
 
     public override void Initialize()
     {
         base.Initialize();
 
         _renderer = GetComponent<Renderer>();
+        behaviorParameters = GetComponent<BehaviorParameters>();
         currentEpisode = 0;
         cumulativeReward = 0f;
 
@@ -54,6 +66,13 @@ public class SnakeAgent : Agent
 
     public override void OnEpisodeBegin()
     {
+        foreach (Tail tail in tails)
+        {
+            Destroy(tail.gameObject);
+            behaviorParameters.BrainParameters.VectorObservationSize -= 2;
+        }
+        tails.Clear();
+
         if (_groundRenderer != null && cumulativeReward != 0f)
         {
             Color flashColor = cumulativeReward > 0 ? Color.green : Color.red;
@@ -66,6 +85,10 @@ public class SnakeAgent : Agent
 
             _flashGroundCoroutine = StartCoroutine(FlashGround(flashColor, 3.0f));
         }
+
+        currentCell = gridManager.grid[new Vector2Int(gridManager.size.x / 2, gridManager.size.y / 2)];
+
+        transform.localPosition = currentCell.position + new Vector3(0, 0.15f, 0);
 
         currentEpisode++;
         cumulativeReward = 0f;
@@ -90,18 +113,8 @@ public class SnakeAgent : Agent
 
     private void SpawnObjects()
     {
-        foreach (Tail tail in tails)
-        {
-            Destroy(tail.gameObject);
-        }
-        tails.Clear();
-
         int foodIndex = 0;
         int poisonIndex = 0;
-
-        currentCell = gridManager.grid[new Vector2Int(gridManager.size.x / 2, gridManager.size.y / 2)];
-
-        transform.localPosition = currentCell.position + new Vector3(0, 0.15f, 0);
 
         foodIndex = gridManager.grid.GetIndex(gridManager.GetRandomValidCell().gridPosition);
         do
@@ -116,26 +129,48 @@ public class SnakeAgent : Agent
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        float foodPoxX_normalized = _food.localPosition.x / 5f;
-        float foodPoxZ_normalized = _food.localPosition.z / 5f;
+        float gridCenterX = gridManager.size.x * gridManager.cellSize / 2f;
+        float gridCenterZ = gridManager.size.y * gridManager.cellSize / 2f;
+        float gridHalfX = gridManager.size.x * gridManager.cellSize / 2f;
+        float gridHalfZ = gridManager.size.y * gridManager.cellSize / 2f;
 
-        float turtlePosX_normalized = transform.localPosition.x / 5f;
-        float turtlePosZ_normalized = transform.localPosition.z / 5f;
+        float foodPoxX_normalized = (_food.localPosition.x - gridCenterX) / gridHalfX;
+        float foodPoxZ_normalized = (_food.localPosition.z - gridCenterZ) / gridHalfZ;
 
-        float turtleRotationY_normalized = (transform.localEulerAngles.y / 360f) * 2f - 1f;
+        float poisonPoxX_normalized = (_poison.localPosition.x - gridCenterX) / gridHalfX;
+        float poisonPoxZ_normalized = (_poison.localPosition.z - gridCenterZ) / gridHalfZ;
+
+        float snakePosX_normalized = (transform.localPosition.x - gridCenterX) / gridHalfX;
+        float snakePosZ_normalized = (transform.localPosition.z - gridCenterZ) / gridHalfZ;
+
+        float snakeRotationY_normalized = (transform.localEulerAngles.y / 360f) * 2f - 1f;
 
         sensor.AddObservation(foodPoxX_normalized);
         sensor.AddObservation(foodPoxZ_normalized);
-        sensor.AddObservation(turtlePosX_normalized);
-        sensor.AddObservation(turtlePosZ_normalized);
-        sensor.AddObservation(turtleRotationY_normalized);
+        sensor.AddObservation(poisonPoxX_normalized);
+        sensor.AddObservation(poisonPoxZ_normalized);
+        sensor.AddObservation(snakePosX_normalized);
+        sensor.AddObservation(snakePosZ_normalized);
+        sensor.AddObservation(snakeRotationY_normalized);
+
+        foreach(Tail tail in tails)
+        {
+            if(tail.isObserved) continue;
+
+            float tailPosX_normalized = (tail.transform.localPosition.x - gridCenterX) / gridHalfX;
+            float tailPosZ_normalized = (tail.transform.localPosition.z - gridCenterZ) / gridHalfZ;
+            sensor.AddObservation(tailPosX_normalized);
+            sensor.AddObservation(tailPosZ_normalized);
+            tail.isObserved = true;
+            behaviorParameters.BrainParameters.VectorObservationSize += 2;
+        }
     }
 
     public override void OnActionReceived(ActionBuffers actions)
     {
         MoveAgent(actions.DiscreteActions);
 
-        AddReward(-2f / MaxStep);
+        AddReward(5f / MaxStep);
 
         cumulativeReward = GetCumulativeReward();
     }
@@ -143,10 +178,21 @@ public class SnakeAgent : Agent
     private void Update()
     {
         moveTimer += Time.deltaTime;
+        timeSinceLastFood += Time.deltaTime; // Increment starvation timer
+
+        // Starvation check
+        if (timeSinceLastFood > maxTimeWithoutFood)
+        {
+            AddReward(-5f); // Penalize for starving
+        }
+
         if (moveTimer < moveDelay)
         {
             return; // Skip movement until delay is met
         }
+        _currentDirection = _queuedDirection;
+        currentCell.nextDirection = _currentDirection;
+
 
         if (gridManager.grid.InBounds(currentCell.gridPosition + _currentDirection))
         {
@@ -179,30 +225,27 @@ public class SnakeAgent : Agent
     public void MoveAgent(ActionSegment<int> actions)
     {
         var action = actions[0];
-        Vector2Int requestedDirection = _currentDirection;
 
         switch (action)
         {
             case 1: // Move forward
-                requestedDirection = Vector2Int.up;
+                _requestedDirection = Vector2Int.up;
                 break;
             case 2: // Rotate left
-                requestedDirection = Vector2Int.left;
+                _requestedDirection = Vector2Int.left;
                 break;
             case 3: // Rotate right
-                requestedDirection = Vector2Int.right;
+                _requestedDirection = Vector2Int.right;
                 break;
             case 4: // Move backward
-                requestedDirection = Vector2Int.down;
+                _requestedDirection = Vector2Int.down;
                 break;
         }
 
         // Prevent reversing direction
-        if (requestedDirection + _currentDirection != Vector2Int.zero)
+        if (_requestedDirection + _currentDirection != Vector2Int.zero)
         {
-            
-            _currentDirection = requestedDirection;
-            currentCell.nextDirection = _currentDirection;
+            _queuedDirection = _requestedDirection;
         }
 
     }
@@ -237,22 +280,36 @@ public class SnakeAgent : Agent
         if (other.CompareTag("Food"))
         {
             Eat();
+            SpawnObjects();
+            timeSinceLastFood = 0f; // Reset starvation timer
+
         }
+        else if (other.CompareTag("Poison"))
+        {
+            SetReward(-5f);
+            SpawnObjects();
+        }
+        
     }
 
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.CompareTag("wall"))
         {
-            SetReward(-1f);
+            SetReward(-10f);
             _renderer.material.color = Color.red;
+            EndEpisode();
+        }
+        else if (collision.gameObject.CompareTag("Tail"))
+        {
+            SetReward(-1f);
             EndEpisode();
         }
     }
 
     public void Eat()
     {
-        AddReward(1.0f);
+        AddReward(5.0f);
         cumulativeReward = GetCumulativeReward();
         AddTail();
     }
@@ -265,6 +322,7 @@ public class SnakeAgent : Agent
             tailCell.nextDirection = previousCell.nextDirection;
             GameObject tailObj = Instantiate(tailGameObject, tailCell.position + new Vector3(0, 0.15f, 0), Quaternion.identity);
             tailObj.transform.localRotation = transform.localRotation;
+            tailObj.transform.parent = Environment.transform;
             Tail tail = tailObj.GetComponent<Tail>();
             tails.Add(tail);
             tail.InitializeTail(tailCell,this);
@@ -300,6 +358,8 @@ public class SnakeAgent : Agent
     {
         var discreteActionsOut = actionsOut.DiscreteActions;
         discreteActionsOut[0] = 0; // Default: no action
+
+
 
         if (Keyboard.current.wKey.isPressed)
             discreteActionsOut[0] = 1; // Move forward

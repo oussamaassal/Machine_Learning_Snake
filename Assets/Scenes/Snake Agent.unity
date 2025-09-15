@@ -205,8 +205,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 742053311}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.4593908, y: 0.00029121086, z: -0.00011128692, w: 0.8882342}
-  m_LocalPosition: {x: -0.007603379, y: 9.5727, z: -6.781278}
+  m_LocalRotation: {x: -0.7077524, y: 0.0001362649, z: -0.00025548815, w: -0.7064606}
+  m_LocalPosition: {x: -5.5725336, y: 41.386284, z: 18.16056}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -377,6 +377,11 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 0
+--- !u!1 &841133749 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 823903372321305055, guid: da9e349e39757634da345dba339cd908, type: 3}
+  m_PrefabInstance: {fileID: 5929304034963026107}
+  m_PrefabAsset: {fileID: 0}
 --- !u!23 &1456396068264813984 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 2684478789857646684, guid: da9e349e39757634da345dba339cd908, type: 3}
@@ -405,7 +410,11 @@ PrefabInstance:
       objectReference: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
     - target: {fileID: 2916694838120082730, guid: da9e349e39757634da345dba339cd908, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 2.5
+      value: 2.62
+      objectReference: {fileID: 0}
+    - target: {fileID: 2916694838120082730, guid: da9e349e39757634da345dba339cd908, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.39
       objectReference: {fileID: 0}
     - target: {fileID: 3408438609268779155, guid: da9e349e39757634da345dba339cd908, type: 3}
       propertyPath: m_LocalPosition.x
@@ -498,6 +507,10 @@ PrefabInstance:
     - target: {fileID: 7509293445774873569, guid: da9e349e39757634da345dba339cd908, type: 3}
       propertyPath: m_BehaviorType
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7509293445774873569, guid: da9e349e39757634da345dba339cd908, type: 3}
+      propertyPath: m_BrainParameters.VectorObservationSize
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 7816210945413620629, guid: da9e349e39757634da345dba339cd908, type: 3}
       propertyPath: m_LocalPosition.x
@@ -686,6 +699,9 @@ MonoBehaviour:
   moveDelay: 0.2
   tails: []
   tailGameObject: {fileID: 1753963514564157001, guid: 05d93c16f9c4fe748915ca4e446699be, type: 3}
+  Environment: {fileID: 841133749}
+  behaviorParameters: {fileID: 0}
+  maxTimeWithoutFood: 5
 --- !u!1 &8114069724333694468 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7152132404393497849, guid: da9e349e39757634da345dba339cd908, type: 3}

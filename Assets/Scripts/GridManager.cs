@@ -42,7 +42,7 @@ public class GridManager : MonoBehaviour
             }
         }
 
-        InitializeGrid();
+        //InitializeGrid();
 
     }
 

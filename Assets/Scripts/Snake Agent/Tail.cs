@@ -6,6 +6,9 @@ public class Tail : MonoBehaviour
     public Cell previousCell;
     public SnakeAgent snake;
     public GridManager gridManager;
+
+    public bool isObserved = false;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
 
     [SerializeField]
@@ -24,6 +27,7 @@ public class Tail : MonoBehaviour
         tailCell.nextDirection = previousCell.nextDirection;
         GameObject tailObj = Instantiate(snake.tailGameObject, tailCell.position + new Vector3(0, 0.15f, 0), Quaternion.identity);
         tailObj.transform.localRotation = transform.localRotation;
+        tailObj.transform.parent = snake.Environment.transform;
         Tail tail = tailObj.GetComponent<Tail>();
         snake.tails.Add(tail);
         tail.InitializeTail(tailCell,snake);
