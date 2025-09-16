@@ -205,8 +205,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 742053311}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.7077524, y: 0.0001362649, z: -0.00025548815, w: -0.7064606}
-  m_LocalPosition: {x: -5.5725336, y: 41.386284, z: 18.16056}
+  m_LocalRotation: {x: 0.71471703, y: 0.0008656682, z: -0.00086732284, w: 0.6994127}
+  m_LocalPosition: {x: 0.275114, y: 12.460417, z: 0.42708015}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -460,9 +460,17 @@ PrefabInstance:
       propertyPath: m_Constraints
       value: 80
       objectReference: {fileID: 0}
+    - target: {fileID: 5220882285072244407, guid: da9e349e39757634da345dba339cd908, type: 3}
+      propertyPath: m_ExcludeLayers.m_Bits
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 6851156697444156379, guid: da9e349e39757634da345dba339cd908, type: 3}
       propertyPath: m_TagString
       value: Poison
+      objectReference: {fileID: 0}
+    - target: {fileID: 7152132404393497849, guid: da9e349e39757634da345dba339cd908, type: 3}
+      propertyPath: m_Layer
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 7409069023278902860, guid: da9e349e39757634da345dba339cd908, type: 3}
       propertyPath: m_LocalPosition.x
@@ -505,12 +513,16 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7509293445774873569, guid: da9e349e39757634da345dba339cd908, type: 3}
+      propertyPath: m_Model
+      value: 
+      objectReference: {fileID: 5022602860645237092, guid: 8a6f7d77e625d8c48b3b318d4e295c89, type: 3}
+    - target: {fileID: 7509293445774873569, guid: da9e349e39757634da345dba339cd908, type: 3}
       propertyPath: m_BehaviorName
       value: Snake
       objectReference: {fileID: 0}
     - target: {fileID: 7509293445774873569, guid: da9e349e39757634da345dba339cd908, type: 3}
       propertyPath: m_BehaviorType
-      value: 0
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7509293445774873569, guid: da9e349e39757634da345dba339cd908, type: 3}
       propertyPath: m_BrainParameters.VectorObservationSize
@@ -708,7 +720,7 @@ MonoBehaviour:
   currentEpisode: 0
   cumulativeReward: 0
   gridManager: {fileID: 8148714737050665385}
-  moveDelay: 5
+  moveDelay: 0.2
   tails: []
   tailGameObject: {fileID: 1753963514564157001, guid: 05d93c16f9c4fe748915ca4e446699be, type: 3}
   Environment: {fileID: 841133749}

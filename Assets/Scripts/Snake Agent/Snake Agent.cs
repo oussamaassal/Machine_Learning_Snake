@@ -170,11 +170,6 @@ public class SnakeAgent : Agent
         sensor.AddObservation(distanceToBottomWall);  // distance to bottom wall
         sensor.AddObservation(distanceToTopWall);     // distance to top wall
 
-
-
-
-
-
         /*foreach(Tail tail in tails)
         {
             if(tail.isObserved) continue;
@@ -225,7 +220,7 @@ public class SnakeAgent : Agent
         }
             
 
-        transform.localPosition = currentCell.position + new Vector3(0, 0.5f, 0);
+        transform.localPosition = currentCell.position + new Vector3(0, 0.15f, 0);
 
         foreach (Tail tail in tails)
         {
@@ -238,7 +233,7 @@ public class SnakeAgent : Agent
             }
                 
 
-            tail.transform.localPosition = tail.currentCell.position + new Vector3(0, 0.5f, 0);
+            tail.transform.localPosition = tail.currentCell.position + new Vector3(0, 0.15f, 0);
         }
 
         UpdateRotation(_currentDirection);
@@ -249,10 +244,6 @@ public class SnakeAgent : Agent
     {
         var action = actions[0];
 
-        if (moveTimer < moveDelay)
-        {
-            return; // Skip movement until delay is met
-        }
 
         switch (action)
         {
@@ -326,7 +317,7 @@ public class SnakeAgent : Agent
         {
             AddReward(-10f);
             Debug.Log("wall");
-            //EndEpisode();
+            EndEpisode();
         }
         else if (collision.gameObject.CompareTag("Tail"))
         {
