@@ -109,3 +109,6 @@ activate_venv.bat
 
 # Ignore Results
 /results
+
+#Ignore Project version
+/ProjectSettings/ProjectVersion.txt
