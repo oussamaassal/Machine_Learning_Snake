@@ -1,56 +1,65 @@
 {
-    "Turtle": {
+    "Snake": {
         "checkpoints": [
             {
-                "steps": 365109,
-                "file_path": "results\\Test4\\Turtle\\Turtle-365109.onnx",
-                "reward": -0.08170003381868203,
-                "creation_time": 1757701833.9431927,
+                "steps": 499951,
+                "file_path": "results\\test4\\Snake\\Snake-499951.onnx",
+                "reward": 4.427099241009841,
+                "creation_time": 1758020658.903594,
                 "auxillary_file_paths": [
-                    "results\\Test4\\Turtle\\Turtle-365109.pt"
+                    "results\\test4\\Snake\\Snake-499951.pt"
                 ]
             },
             {
-                "steps": 499938,
-                "file_path": "results\\Test4\\Turtle\\Turtle-499938.onnx",
-                "reward": -0.3679200440645218,
-                "creation_time": 1757706345.7982523,
+                "steps": 500015,
+                "file_path": "results\\test4\\Snake\\Snake-500015.onnx",
+                "reward": 4.427099241009841,
+                "creation_time": 1758020658.9801798,
                 "auxillary_file_paths": [
-                    "results\\Test4\\Turtle\\Turtle-499938.pt"
+                    "results\\test4\\Snake\\Snake-500015.pt"
                 ]
             },
             {
-                "steps": 500002,
-                "file_path": "results\\Test4\\Turtle\\Turtle-500002.onnx",
-                "reward": -0.3679200440645218,
-                "creation_time": 1757706345.8442812,
+                "steps": 999954,
+                "file_path": "results\\test4\\Snake\\Snake-999954.onnx",
+                "reward": 6.27959817958016,
+                "creation_time": 1758022964.3447068,
                 "auxillary_file_paths": [
-                    "results\\Test4\\Turtle\\Turtle-500002.pt"
+                    "results\\test4\\Snake\\Snake-999954.pt"
                 ]
             },
             {
-                "steps": 500002,
-                "file_path": "results\\Test4\\Turtle\\Turtle-500002.onnx",
-                "reward": null,
-                "creation_time": 1757706869.66802,
+                "steps": 1499994,
+                "file_path": "results\\test4\\Snake\\Snake-1499994.onnx",
+                "reward": 5.104183506965637,
+                "creation_time": 1758023995.5464182,
                 "auxillary_file_paths": [
-                    "results\\Test4\\Turtle\\Turtle-500002.pt"
+                    "results\\test4\\Snake\\Snake-1499994.pt"
+                ]
+            },
+            {
+                "steps": 1510067,
+                "file_path": "results\\test4\\Snake\\Snake-1510067.onnx",
+                "reward": 5.737207412719727,
+                "creation_time": 1758024020.556176,
+                "auxillary_file_paths": [
+                    "results\\test4\\Snake\\Snake-1510067.pt"
                 ]
             }
         ],
         "final_checkpoint": {
-            "steps": 500002,
-            "file_path": "results\\Test4\\Turtle.onnx",
-            "reward": null,
-            "creation_time": 1757706869.66802,
+            "steps": 1510067,
+            "file_path": "results\\test4\\Snake.onnx",
+            "reward": 5.737207412719727,
+            "creation_time": 1758024020.556176,
             "auxillary_file_paths": [
-                "results\\Test4\\Turtle\\Turtle-500002.pt"
+                "results\\test4\\Snake\\Snake-1510067.pt"
             ]
         }
     },
     "metadata": {
         "stats_format_version": "0.3.0",
         "mlagents_version": "0.30.0",
-        "torch_version": "2.8.0+cpu"
+        "torch_version": "2.8.0+cu129"
     }
 }

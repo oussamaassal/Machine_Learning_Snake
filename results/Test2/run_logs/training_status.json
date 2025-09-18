@@ -1,23 +1,23 @@
 {
-    "Turtle": {
+    "Snake": {
         "checkpoints": [
             {
-                "steps": 5931,
-                "file_path": "results\\Test2\\Turtle\\Turtle-5931.onnx",
-                "reward": -0.8061599099387725,
-                "creation_time": 1757697528.9385035,
+                "steps": 11694,
+                "file_path": "results\\test2\\Snake\\Snake-11694.onnx",
+                "reward": 2.1174849515611474,
+                "creation_time": 1758017945.8344517,
                 "auxillary_file_paths": [
-                    "results\\Test2\\Turtle\\Turtle-5931.pt"
+                    "results\\test2\\Snake\\Snake-11694.pt"
                 ]
             }
         ],
         "final_checkpoint": {
-            "steps": 5931,
-            "file_path": "results\\Test2\\Turtle.onnx",
-            "reward": -0.8061599099387725,
-            "creation_time": 1757697528.9385035,
+            "steps": 11694,
+            "file_path": "results\\test2\\Snake.onnx",
+            "reward": 2.1174849515611474,
+            "creation_time": 1758017945.8344517,
             "auxillary_file_paths": [
-                "results\\Test2\\Turtle\\Turtle-5931.pt"
+                "results\\test2\\Snake\\Snake-11694.pt"
             ]
         }
     },
