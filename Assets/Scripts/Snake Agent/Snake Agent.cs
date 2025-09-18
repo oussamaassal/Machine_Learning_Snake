@@ -97,16 +97,24 @@ public class SnakeAgent : Agent
 
     private void SpawnObjects()
     {
-        int foodIndex = gridManager.grid.GetIndex(gridManager.GetRandomValidCell().gridPosition);
-        int poisonIndex;
+        // Find a valid, unoccupied cell for food
+        Cell foodCell;
         do
         {
-            poisonIndex = gridManager.grid.GetIndex(gridManager.GetRandomValidCell().gridPosition);
-        } while (poisonIndex == foodIndex);
+            foodCell = gridManager.GetRandomValidCell();
+        } while (foodCell.isOccupied);
 
-        _food.localPosition = gridManager.grid.data[foodIndex].position;
-        _poison.localPosition = gridManager.grid.data[poisonIndex].position;
+        // Find a valid, unoccupied cell for poison, and not the same as food
+        Cell poisonCell;
+        do
+        {
+            poisonCell = gridManager.GetRandomValidCell();
+        } while (poisonCell.isOccupied || poisonCell == foodCell);
+
+        _food.localPosition = foodCell.position;
+        _poison.localPosition = poisonCell.position;
     }
+
 
     public override void CollectObservations(VectorSensor sensor)
     {
@@ -262,7 +270,7 @@ public class SnakeAgent : Agent
 
         if (timeSinceLastFood > maxTimeWithoutFood)
         {
-            AddReward(-0.2f); // Increased starvation penalty
+            AddReward(-50f); // Increased starvation penalty
             timeSinceLastFood = 0f;
         }
 
@@ -385,7 +393,7 @@ public class SnakeAgent : Agent
         }
         else if (other.CompareTag("Poison"))
         {
-            AddReward(-1f); // Increased poison penalty
+            AddReward(-50f); // Increased poison penalty
             SpawnObjects();
         }
     }
