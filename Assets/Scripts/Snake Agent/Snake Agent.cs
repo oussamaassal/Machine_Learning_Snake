@@ -393,7 +393,7 @@ public class SnakeAgent : Agent
         }
         else if (other.CompareTag("Poison"))
         {
-            AddReward(-50f); // Increased poison penalty
+            AddReward(-150f); // Increased poison penalty
             SpawnObjects();
         }
     }
