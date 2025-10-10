@@ -31,8 +31,8 @@ public class DungeonPathfinder2D {
     HashSet<Node> closed;
     Stack<Vector2Int> stack;
 
-    public DungeonPathfinder2D(Vector2Int size) {
-        grid = new Grid2D<Node>(size, Vector2Int.zero);
+    public DungeonPathfinder2D(Vector2Int size, Vector2Int offset) {
+        grid = new Grid2D<Node>(size, offset);
 
         queue = new SimplePriorityQueue<Node, float>();
         closed = new HashSet<Node>();

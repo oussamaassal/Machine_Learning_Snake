@@ -27,6 +27,8 @@ public class Generator2D : MonoBehaviour {
     [SerializeField]
     Vector2Int size;
     [SerializeField]
+    Vector2Int offset;
+    [SerializeField]
     int roomCount;
     [SerializeField]
     Vector2Int roomMaxSize;
@@ -128,7 +130,7 @@ public class Generator2D : MonoBehaviour {
     }
 
     void PathfindHallways() {
-        DungeonPathfinder2D aStar = new DungeonPathfinder2D(size);
+        DungeonPathfinder2D aStar = new DungeonPathfinder2D(size,offset);
 
         foreach (var edge in selectedEdges) {
             var startRoom = (edge.U as Vertex<Room>).Item;

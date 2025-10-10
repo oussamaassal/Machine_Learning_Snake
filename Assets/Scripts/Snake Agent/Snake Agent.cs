@@ -396,6 +396,12 @@ public class SnakeAgent : Agent
             AddReward(-150f); // Increased poison penalty
             SpawnObjects();
         }
+
+        if (other.gameObject.CompareTag("wall") || other.gameObject.CompareTag("Tail"))
+        {
+            AddReward(-200f); // Increased collision penalty
+            EndEpisode();
+        }
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -432,7 +438,7 @@ public class SnakeAgent : Agent
             tailObj.transform.parent = Environment.transform;
             Tail tail = tailObj.GetComponent<Tail>();
             tails.Add(tail);
-            tail.InitializeTail(tailCell, this);
+            //tail.InitializeTail(tailCell, this);
         }
         else
         {

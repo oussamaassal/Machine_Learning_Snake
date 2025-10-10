@@ -3,11 +3,12 @@ using UnityEngine;
 
 public class Cell
 {
-    enum CellState
+    public enum CellState
     {
         None,
-        Room,
-        Hallway
+        Wall,
+        Obstacle,
+        Path
     }
     public Vector3 position;
     public Vector2Int gridPosition;
@@ -22,7 +23,8 @@ public class Cell
 
     public bool isOccupied = false;
 
-    CellState state = CellState.None;
+    public CellState state = CellState.None;
+
     public Cell(Vector3 position)
     {
         this.position = position;

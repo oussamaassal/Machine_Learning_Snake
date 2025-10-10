@@ -3,7 +3,7 @@ using UnityEngine;
 public class GridManager : MonoBehaviour
 {
     [SerializeField] public Vector2Int size;
-    [SerializeField] Vector2Int offset;
+    [SerializeField] public Vector2Int offset;
 
     public int cellSize = 1;
 
@@ -41,9 +41,10 @@ public class GridManager : MonoBehaviour
             }
         }
 
-        //InitializeGrid();
+        InitializeGrid();
 
     }
+
 
     private void InitializeGrid()
     {
