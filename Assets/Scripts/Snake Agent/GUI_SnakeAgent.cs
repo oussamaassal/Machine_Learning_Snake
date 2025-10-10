@@ -22,12 +22,12 @@ public class GUI_SnakeAgent : MonoBehaviour
 
     private void OnGUI()
     {
-        string debugEpisode = $"Episide: {_snakeAgent.cumulativeReward} - Step: {_snakeAgent.StepCount}";
+        //string debugEpisode = $"Episide: {_snakeAgent.cumulativeReward} - Step: {_snakeAgent.StepCount}";
         string debugReward = $"Reward: {_snakeAgent.cumulativeReward.ToString()}";
 
         GUIStyle rewardStyle = _snakeAgent.cumulativeReward < 0 ? _negativeStyle : _positiveStyle;
 
-        GUI.Label(new Rect(20, 20, 500, 30), debugEpisode, _defualtStyle);
+        //GUI.Label(new Rect(20, 20, 500, 30), debugEpisode, _defualtStyle);
         GUI.Label(new Rect(20, 60, 500, 30), debugReward, rewardStyle);
     }
 

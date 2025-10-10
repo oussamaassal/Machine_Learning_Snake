@@ -1,7 +1,14 @@
 using UnityEngine;
 
+
 public class Cell
 {
+    enum CellState
+    {
+        None,
+        Room,
+        Hallway
+    }
     public Vector3 position;
     public Vector2Int gridPosition;
 
@@ -15,6 +22,7 @@ public class Cell
 
     public bool isOccupied = false;
 
+    CellState state = CellState.None;
     public Cell(Vector3 position)
     {
         this.position = position;
