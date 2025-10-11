@@ -8,6 +8,10 @@ public class Tail : MonoBehaviour
     public GridManager gridManager;
 
     public bool isObserved = false;
+    public bool isLastTail = true;
+
+    public Mesh middleTrainModel;
+    public Mesh backTrainModel;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
 
@@ -45,9 +49,21 @@ public class Tail : MonoBehaviour
         else if (direction == Vector2Int.left)
             angle = 270f;
 
-        transform.localRotation = Quaternion.Euler(90f, angle, 0f);
+        transform.localRotation = Quaternion.Euler(0f, angle + 180f, 0f);
     }
 
+    private void Update()
+    {
+
+        if (isLastTail)
+        {
+            GetComponent<MeshFilter>().mesh = backTrainModel;
+        }
+        else
+        {
+            GetComponent<MeshFilter>().mesh = middleTrainModel;
+        }
+    }
     private void OnValidate()
     {
         if (debugCellInfo)
@@ -75,6 +91,7 @@ public class Tail : MonoBehaviour
             // Reset the bool so it only prints once per click
             debugCellInfo = false;
         }
+
     }
 
 }

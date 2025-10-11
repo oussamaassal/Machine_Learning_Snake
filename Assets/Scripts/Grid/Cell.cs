@@ -57,7 +57,7 @@ public class Cell
     {
         if (isOccupied)
         {
-            cubeObject.GetComponent<Renderer>().material.color = Color.red;
+            //cubeObject.GetComponent<Renderer>().material.color = Color.red;
         }
         else
         {
@@ -71,6 +71,11 @@ public class Cell
         if(state == CellState.Path)
         {
             cubeObject.GetComponent<Renderer>().material.color = Color.pink;
+        }
+
+        if(state == CellState.LastTail)
+        {
+            cubeObject.GetComponent<Renderer>().material.color = Color.blue;
         }
 
         

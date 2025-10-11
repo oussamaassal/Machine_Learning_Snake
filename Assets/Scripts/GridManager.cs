@@ -46,14 +46,14 @@ public class GridManager : MonoBehaviour
 
     }
 
-    private void Update()
+
+    public void UpdateCells()
     {
-        foreach(Cell cell in grid.data)
+        foreach (Cell cell in grid.data)
         {
             cell.CellUpdate();
         }
     }
-
     private void InitializeGrid()
     {
         foreach(Cell cell in grid.data)

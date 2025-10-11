@@ -104,7 +104,7 @@ public class Snake : MonoBehaviour
 
         currentEpisode++;
         cumulativeReward = 0f;
-        _renderer.material.color = Color.green;
+        //_renderer.material.color = Color.green;
 
         SpawnObjects();
 
@@ -190,6 +190,7 @@ public class Snake : MonoBehaviour
             previousCell = currentCell;
             currentCell = gridManager.grid[currentCell.gridPosition + _currentDirection];
             currentCell.isOccupied = true;
+
             if(tails.Count == 0)
             {
                 if(previousCell!= null) previousCell.isOccupied = true;
@@ -212,7 +213,17 @@ public class Snake : MonoBehaviour
             }
 
             tail.transform.localPosition = tail.currentCell.position + new Vector3(0, 0.15f, 0);
+
+            if (tail.isLastTail)
+            {
+                tail.currentCell.state = Cell.CellState.LastTail;
+                tail.previousCell.state = Cell.CellState.None;
+            }
+
         }
+
+        gridManager.UpdateCells();
+
 
         UpdateRotation(_currentDirection);
         moveTimer = 0;
@@ -256,7 +267,7 @@ public class Snake : MonoBehaviour
         else if (direction == Vector2Int.left)
             angle = 270f;
 
-        transform.localRotation = Quaternion.Euler(90f, angle, 0f);
+        transform.localRotation = Quaternion.Euler(0f, angle, 0f);
     }
 
     public void UpdateCellDirection()
@@ -291,12 +302,16 @@ public class Snake : MonoBehaviour
 
             if (gridManager.grid[b.Position].isOccupied)
             {
-                pathCost.cost += 100;
+                pathCost.cost += 500;
             }
 
             if (!gridManager.grid[b.Position].isValid)
             {
-                pathCost.cost += 200;
+                pathCost.cost += 1000;
+            }
+            if(gridManager.grid[b.Position].state == Cell.CellState.LastTail)
+            {
+                pathCost.cost -= 200;
             }
 
             if (gridManager.grid[b.Position].state == Cell.CellState.Wall)
@@ -366,10 +381,10 @@ public class Snake : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Food"))
-        {
+        { 
+            Eat();
             gridManager.grid[new Vector2Int((int)_food.position.x, (int)_food.position.z)].isOccupied = false;
             gridManager.grid[new Vector2Int((int)_poison.position.x, (int)_poison.position.z)].isOccupied = false;
-            Eat();
             SpawnObjects();
             timeSinceLastFood = 0f; // Reset starvation timer
         }
@@ -430,6 +445,7 @@ public class Snake : MonoBehaviour
         }
         else
         {
+            tails.Last().isLastTail = false;
             tails.Last().AddTail();
         }
     }
