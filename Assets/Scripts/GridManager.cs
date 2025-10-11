@@ -1,3 +1,5 @@
+using NUnit.Framework;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GridManager : MonoBehaviour
@@ -8,7 +10,6 @@ public class GridManager : MonoBehaviour
     public int cellSize = 1;
 
     public Grid2D<Cell> grid;
-
 
     private void Awake()
     {
@@ -45,6 +46,13 @@ public class GridManager : MonoBehaviour
 
     }
 
+    private void Update()
+    {
+        foreach(Cell cell in grid.data)
+        {
+            cell.CellUpdate();
+        }
+    }
 
     private void InitializeGrid()
     {

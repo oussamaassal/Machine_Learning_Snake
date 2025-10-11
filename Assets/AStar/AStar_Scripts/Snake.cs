@@ -31,6 +31,7 @@ public class Snake : MonoBehaviour
 
     public Cell currentCell;
     public Cell previousCell;
+    public Cell pre_previousCell;
 
     [SerializeField] private float moveDelay = 0.2f; // Time between moves (seconds)
     private float moveTimer = 0f;
@@ -45,6 +46,14 @@ public class Snake : MonoBehaviour
 
     private List<Vector2Int> lastPath;
     private bool isResetting = false;
+
+
+    static readonly Vector2Int[] neighbors = {
+        new Vector2Int(1, 0),
+        new Vector2Int(-1, 0),
+        new Vector2Int(0, 1),
+        new Vector2Int(0, -1),
+    };
 
 
     private void Awake()
@@ -67,9 +76,10 @@ public class Snake : MonoBehaviour
 
     private void BeginEpisode()
     {
-        if (isResetting) return;
-        isResetting = true;
-
+        foreach(Cell cell in gridManager.grid.data)
+        {
+            cell.isOccupied = false;
+        }
         foreach (Tail tail in tails)
         {
             if (tail != null)
@@ -98,7 +108,6 @@ public class Snake : MonoBehaviour
 
         SpawnObjects();
 
-        isResetting = false;
     }
 
 
@@ -118,6 +127,7 @@ public class Snake : MonoBehaviour
 
     private void SpawnObjects()
     {
+            
         // Find a valid, unoccupied cell for food
         Cell foodCell;
         do
@@ -135,6 +145,9 @@ public class Snake : MonoBehaviour
         _food.localPosition = foodCell.position;
         _poison.localPosition = poisonCell.position;
 
+        gridManager.grid[foodCell.gridPosition].isOccupied = true;
+        gridManager.grid[poisonCell.gridPosition].isOccupied = true;
+
         PathfindHallways(); // Call pathfinding to visualize path
     }
 
@@ -150,6 +163,20 @@ public class Snake : MonoBehaviour
             timeSinceLastFood = 0f; // Reset timer
         }
 
+        foreach(Vector2Int neighbor in neighbors)
+        {
+            if (gridManager.grid[currentCell.gridPosition + neighbor].state == Cell.CellState.Path)
+            {
+                _requestedDirection = neighbor;
+
+                if (_requestedDirection + _currentDirection != Vector2Int.zero)
+                {
+                    _queuedDirection = _requestedDirection;
+                }
+                break;
+            }
+        }
+
         if (moveTimer < moveDelay)
         {
             return; // Skip movement until delay is met
@@ -159,9 +186,16 @@ public class Snake : MonoBehaviour
 
         if (gridManager.grid.InBounds(currentCell.gridPosition + _currentDirection))
         {
+            pre_previousCell = previousCell;
             previousCell = currentCell;
             currentCell = gridManager.grid[currentCell.gridPosition + _currentDirection];
             currentCell.isOccupied = true;
+            if(tails.Count == 0)
+            {
+                if(previousCell!= null) previousCell.isOccupied = true;
+                if(pre_previousCell!= null) pre_previousCell.isOccupied = false;
+            }
+            
         }
 
         transform.localPosition = currentCell.position + new Vector3(0, 0.15f, 0);
@@ -174,6 +208,7 @@ public class Snake : MonoBehaviour
                 tail.previousCell = tail.currentCell;
                 tail.currentCell = gridManager.grid[tail.currentCell.gridPosition + tail.currentCell.nextDirection];
                 tail.currentCell.isOccupied = true;
+                tail.previousCell.isOccupied = false;
             }
 
             tail.transform.localPosition = tail.currentCell.position + new Vector3(0, 0.15f, 0);
@@ -181,6 +216,7 @@ public class Snake : MonoBehaviour
 
         UpdateRotation(_currentDirection);
         moveTimer = 0;
+        PathfindHallways(); // Call pathfinding to visualize path
     }
 
     public void MoveAgent(int action)
@@ -241,12 +277,27 @@ public class Snake : MonoBehaviour
             var endPosf = _food.position;
             var startPos = new Vector2Int((int)startPosf.x, (int)startPosf.z);
             var endPos = new Vector2Int((int)endPosf.x, (int)endPosf.z);
+        
+        foreach(Cell cell in gridManager.grid.data)
+        {
+            cell.state = Cell.CellState.None;
+        }
 
         var path = aStar.FindPath(startPos, endPos, (DungeonPathfinder2D.Node a, DungeonPathfinder2D.Node b) =>
         {
             var pathCost = new DungeonPathfinder2D.PathCost();
 
             pathCost.cost = Vector2Int.Distance(b.Position, endPos);    //heuristic
+
+            if (gridManager.grid[b.Position].isOccupied)
+            {
+                pathCost.cost += 100;
+            }
+
+            if (!gridManager.grid[b.Position].isValid)
+            {
+                pathCost.cost += 200;
+            }
 
             if (gridManager.grid[b.Position].state == Cell.CellState.Wall)
             {
@@ -316,12 +367,16 @@ public class Snake : MonoBehaviour
     {
         if (other.CompareTag("Food"))
         {
+            gridManager.grid[new Vector2Int((int)_food.position.x, (int)_food.position.z)].isOccupied = false;
+            gridManager.grid[new Vector2Int((int)_poison.position.x, (int)_poison.position.z)].isOccupied = false;
             Eat();
             SpawnObjects();
             timeSinceLastFood = 0f; // Reset starvation timer
         }
         else if (other.CompareTag("Poison"))
         {
+            gridManager.grid[new Vector2Int((int)_food.position.x, (int)_food.position.z)].isOccupied = false;
+            gridManager.grid[new Vector2Int((int)_poison.position.x, (int)_poison.position.z)].isOccupied = false;
             cumulativeReward -= 5f;
             SpawnObjects();
         }
@@ -355,6 +410,7 @@ public class Snake : MonoBehaviour
 
     public void Eat()
     {
+        
         cumulativeReward += 5.0f;
         AddTail();
     }
@@ -364,6 +420,7 @@ public class Snake : MonoBehaviour
         if (tails.Count == 0)
         {
             Cell tailCell = previousCell;
+            tailCell.isOccupied = true;
             tailCell.nextDirection = previousCell.nextDirection;
             GameObject tailObj = Instantiate(tailGameObject, tailCell.position + new Vector3(0, 0.15f, 0), Quaternion.identity);
             tailObj.transform.localRotation = transform.localRotation;
@@ -391,6 +448,6 @@ public class Snake : MonoBehaviour
         else if (Keyboard.current.sKey.isPressed)
             action = 4; // Move backward
 
-        MoveAgent(action);
+        //MoveAgent(action);
     }
 }

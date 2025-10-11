@@ -24,6 +24,7 @@ public class Tail : MonoBehaviour
     public void AddTail()
     {
         Cell tailCell = previousCell;
+        tailCell.isOccupied = true;
         tailCell.nextDirection = previousCell.nextDirection;
         GameObject tailObj = Instantiate(snake.tailGameObject, tailCell.position + new Vector3(0, 0.15f, 0), Quaternion.identity);
         tailObj.transform.localRotation = transform.localRotation;

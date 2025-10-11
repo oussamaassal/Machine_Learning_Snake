@@ -1,6 +1,5 @@
 using UnityEngine;
 
-
 public class Cell
 {
     public enum CellState
@@ -8,7 +7,9 @@ public class Cell
         None,
         Wall,
         Obstacle,
-        Path
+        Path,
+        LastTail,
+        Poison
     }
     public Vector3 position;
     public Vector2Int gridPosition;
@@ -25,6 +26,8 @@ public class Cell
 
     public CellState state = CellState.None;
 
+    public GameObject cubeObject;
+
     public Cell(Vector3 position)
     {
         this.position = position;
@@ -33,10 +36,10 @@ public class Cell
 
     public void instantiatePosition(GridManager gridManager)
     {
-        GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        cube.transform.position = position;
-        cube.transform.localScale = new Vector3(0.9f, 0.1f, 0.9f);
-        cube.GetComponent<Renderer>().material.color = Color.cyan;
+        cubeObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        cubeObject.transform.position = position;
+        cubeObject.transform.localScale = new Vector3(0.9f, 0.1f, 0.9f);
+        cubeObject.GetComponent<Renderer>().material.color = Color.cyan;
 
         this.gridManager = gridManager;
         // Initialize neighbors here since cellSize is non-static and cannot be used in field initializers
@@ -47,6 +50,30 @@ public class Cell
             new Vector2Int(0, gridManager.cellSize),
             new Vector2Int(0, -gridManager.cellSize),
         };
+
+    }
+
+    public void CellUpdate()
+    {
+        if (isOccupied)
+        {
+            cubeObject.GetComponent<Renderer>().material.color = Color.red;
+        }
+        else
+        {
+            cubeObject.GetComponent<Renderer>().material.color = Color.green;
+        }
+        if (!isValid)
+        {
+            cubeObject.GetComponent<Renderer>().material.color = Color.black;
+        }
+
+        if(state == CellState.Path)
+        {
+            cubeObject.GetComponent<Renderer>().material.color = Color.pink;
+        }
+
+        
     }
 
 }
