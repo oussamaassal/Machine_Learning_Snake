@@ -28,6 +28,11 @@ public class Cell
 
     public GameObject cubeObject;
 
+    public int cost;
+
+    // Add a field for the TextMesh
+    public TextMesh costTextMesh;
+
     public Cell(Vector3 position)
     {
         this.position = position;
@@ -51,13 +56,27 @@ public class Cell
             new Vector2Int(0, -gridManager.cellSize),
         };
 
+        // Create and position the TextMesh above the cube
+        GameObject textObj = new GameObject("CostText");
+        textObj.transform.SetParent(cubeObject.transform);
+        textObj.transform.localPosition = new Vector3(0, 0.3f, 0); // Slightly above the cube
+
+        costTextMesh = textObj.AddComponent<TextMesh>();
+        costTextMesh.text = cost.ToString("0.##");
+        costTextMesh.characterSize = 0.2f;
+        costTextMesh.fontSize = 20;
+        costTextMesh.anchor = TextAnchor.MiddleCenter;
+        costTextMesh.alignment = TextAlignment.Center;
+        costTextMesh.color = Color.black;
+        textObj.transform.localScale += new Vector3(0, -9f, 0); // Scale down the text
+
     }
 
     public void CellUpdate()
     {
         if (isOccupied)
         {
-            //cubeObject.GetComponent<Renderer>().material.color = Color.red;
+            cubeObject.GetComponent<Renderer>().material.color = Color.red;
         }
         else
         {
@@ -78,7 +97,14 @@ public class Cell
             cubeObject.GetComponent<Renderer>().material.color = Color.blue;
         }
 
-        
+        // Update the cost text
+        if (costTextMesh != null)
+        {
+            costTextMesh.text = cost.ToString("0.##");
+
+            costTextMesh.transform.localRotation = Quaternion.Euler(90, 0, 0);
+
+        }
     }
 
 }

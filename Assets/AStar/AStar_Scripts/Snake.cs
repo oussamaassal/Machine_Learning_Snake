@@ -329,6 +329,8 @@ public class Snake : MonoBehaviour
 
             pathCost.traversable = true;
 
+            gridManager.grid[b.Position].cost = (int) pathCost.cost;
+
             return pathCost;
         });
 
