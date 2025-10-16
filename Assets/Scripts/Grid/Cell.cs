@@ -30,6 +30,10 @@ public class Cell
 
     public int cost;
 
+    public bool hasTail;
+
+    public Tail tail;
+
     // Add a field for the TextMesh
     public TextMesh costTextMesh;
 

@@ -79,6 +79,9 @@ public class Snake : MonoBehaviour
         foreach(Cell cell in gridManager.grid.data)
         {
             cell.isOccupied = false;
+            cell.hasTail = false;
+            cell.tail = null;
+            cell.cost = 0;
         }
         foreach (Tail tail in tails)
         {
@@ -126,21 +129,20 @@ public class Snake : MonoBehaviour
     }
 
     private void SpawnObjects()
-    {
-            
+    {  
         // Find a valid, unoccupied cell for food
         Cell foodCell;
         do
         {
             foodCell = gridManager.GetRandomValidCell();
-        } while (foodCell.isOccupied);
+        } while (foodCell.isOccupied || foodCell.hasTail);
 
         // Find a valid, unoccupied cell for poison, and not the same as food
         Cell poisonCell;
         do
         {
             poisonCell = gridManager.GetRandomValidCell();
-        } while (poisonCell.isOccupied || poisonCell == foodCell);
+        } while (poisonCell.isOccupied || poisonCell == foodCell || poisonCell.hasTail);
 
         _food.localPosition = foodCell.position;
         _poison.localPosition = poisonCell.position;
@@ -210,6 +212,8 @@ public class Snake : MonoBehaviour
                 tail.currentCell = gridManager.grid[tail.currentCell.gridPosition + tail.currentCell.nextDirection];
                 tail.currentCell.isOccupied = true;
                 tail.previousCell.isOccupied = false;
+                tail.currentCell.hasTail = true;
+                tail.previousCell.hasTail = false;
             }
 
             tail.transform.localPosition = tail.currentCell.position + new Vector3(0, 0.15f, 0);
@@ -220,14 +224,17 @@ public class Snake : MonoBehaviour
                 tail.previousCell.state = Cell.CellState.None;
             }
 
+            tail.currentCell.tail = tail;
+
         }
 
-        gridManager.UpdateCells();
 
 
         UpdateRotation(_currentDirection);
         moveTimer = 0;
         PathfindHallways(); // Call pathfinding to visualize path
+        gridManager.UpdateCells();
+
     }
 
     public void MoveAgent(int action)
@@ -302,16 +309,17 @@ public class Snake : MonoBehaviour
 
             if (gridManager.grid[b.Position].isOccupied)
             {
-                pathCost.cost += 500;
+                pathCost.cost += 100;
             }
 
             if (!gridManager.grid[b.Position].isValid)
             {
-                pathCost.cost += 1000;
+                pathCost.cost += 1000000;
             }
-            if(gridManager.grid[b.Position].state == Cell.CellState.LastTail)
+            if(gridManager.grid[b.Position].hasTail)
             {
-                pathCost.cost -= 200;
+                int index = tails.IndexOf(gridManager.grid[b.Position].tail) + 1;
+                pathCost.cost += (tails.Count * 50) / index;
             }
 
             if (gridManager.grid[b.Position].state == Cell.CellState.Wall)
