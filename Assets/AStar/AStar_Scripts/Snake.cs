@@ -3,8 +3,6 @@ using UnityEngine.InputSystem;
 using System.Collections;
 using System.Linq;
 using System.Collections.Generic;
-using Graphs;
-
 
 public class Snake : MonoBehaviour
 {
@@ -33,8 +31,7 @@ public class Snake : MonoBehaviour
     public Cell previousCell;
     public Cell pre_previousCell;
 
-    [SerializeField] private float moveDelay = 0.2f; // Time between moves (seconds)
-    private float moveTimer = 0f;
+    private bool moveRequested = false; // only move when requested (no delay)
 
     public List<Tail> tails;
     public GameObject tailGameObject;
@@ -81,7 +78,6 @@ public class Snake : MonoBehaviour
             cell.isOccupied = false;
             cell.hasTail = false;
             cell.tail = null;
-            cell.cost = 0;
         }
         foreach (Tail tail in tails)
         {
@@ -107,10 +103,8 @@ public class Snake : MonoBehaviour
 
         currentEpisode++;
         cumulativeReward = 0f;
-        //_renderer.material.color = Color.green;
 
         SpawnObjects();
-
     }
 
 
@@ -137,7 +131,7 @@ public class Snake : MonoBehaviour
             foodCell = gridManager.GetRandomValidCell();
         } while (foodCell.isOccupied || foodCell.hasTail);
 
-        // Find a valid, unoccupied cell for poison, and not the same as food
+        // Find a valid, unoccupied cell for poison, and not
         Cell poisonCell;
         do
         {
@@ -150,12 +144,24 @@ public class Snake : MonoBehaviour
         gridManager.grid[foodCell.gridPosition].isOccupied = true;
         gridManager.grid[poisonCell.gridPosition].isOccupied = true;
 
-        PathfindHallways(); // Call pathfinding to visualize path
+        // Pathfinding removed — only movement logic kept
     }
 
     private void Update()
     {
-        moveTimer += Time.deltaTime;
+        // Handle input here (was previously in FixedUpdate)
+        int action = 0;
+        if (Keyboard.current.wKey != null && Keyboard.current.wKey.wasPressedThisFrame)
+            action = 1; // Move forward
+        else if (Keyboard.current.aKey != null && Keyboard.current.aKey.wasPressedThisFrame)
+            action = 2; // Rotate left
+        else if (Keyboard.current.dKey != null && Keyboard.current.dKey.wasPressedThisFrame)
+            action = 3; // Rotate right
+        else if (Keyboard.current.sKey != null && Keyboard.current.sKey.wasPressedThisFrame)
+            action = 4; // Move backward
+
+        if (action != 0) MoveAgent(action);
+
         timeSinceLastFood += Time.deltaTime; // Increment starvation timer
 
         // Starvation check
@@ -165,24 +171,15 @@ public class Snake : MonoBehaviour
             timeSinceLastFood = 0f; // Reset timer
         }
 
-        foreach(Vector2Int neighbor in neighbors)
+        // Don't move unless an input/action requested
+        if (!moveRequested)
         {
-            if (gridManager.grid[currentCell.gridPosition + neighbor].state == Cell.CellState.Path)
-            {
-                _requestedDirection = neighbor;
-
-                if (_requestedDirection + _currentDirection != Vector2Int.zero)
-                {
-                    _queuedDirection = _requestedDirection;
-                }
-                break;
-            }
+            return;
         }
 
-        if (moveTimer < moveDelay)
-        {
-            return; // Skip movement until delay is met
-        }
+        // Immediate move when requested (no delay)
+
+        // Apply queued direction (set by MoveAgent / keyboard)
         _currentDirection = _queuedDirection;
         currentCell.nextDirection = _currentDirection;
 
@@ -218,27 +215,20 @@ public class Snake : MonoBehaviour
 
             tail.transform.localPosition = tail.currentCell.position + new Vector3(0, 0.15f, 0);
 
-            if (tail.isLastTail)
-            {
-                tail.currentCell.state = Cell.CellState.LastTail;
-                tail.previousCell.state = Cell.CellState.None;
-            }
-
+            // removed visual / state updates (cell color / displayed cost)
             tail.currentCell.tail = tail;
-
         }
 
-
-
         UpdateRotation(_currentDirection);
-        moveTimer = 0;
-        PathfindHallways(); // Call pathfinding to visualize path
-        gridManager.UpdateCells();
-
+        // movement performed, clear request
+        moveRequested = false; // <-- clear request so it won't continue moving automatically
+        // removed per-cell visual update call
     }
 
     public void MoveAgent(int action)
     {
+        if (action == 0) return; // no action -> don't request a move
+
         switch (action)
         {
             case 1: // Move forward
@@ -259,6 +249,7 @@ public class Snake : MonoBehaviour
         if (_requestedDirection + _currentDirection != Vector2Int.zero)
         {
             _queuedDirection = _requestedDirection;
+            moveRequested = true; // <-- mark that a move should occur on the next Update (after delay)
         }
     }
 
@@ -286,107 +277,6 @@ public class Snake : MonoBehaviour
             else cell.nextDirection = tails.Last().currentCell.nextDirection;
         }
     }
-
-    void PathfindHallways()
-    {
-        DungeonPathfinder2D aStar = new DungeonPathfinder2D(gridManager.size, gridManager.offset);
-
-            var startPosf = currentCell.position;
-            var endPosf = _food.position;
-            var startPos = new Vector2Int((int)startPosf.x, (int)startPosf.z);
-            var endPos = new Vector2Int((int)endPosf.x, (int)endPosf.z);
-        
-        foreach(Cell cell in gridManager.grid.data)
-        {
-            cell.state = Cell.CellState.None;
-        }
-
-        var path = aStar.FindPath(startPos, endPos, (DungeonPathfinder2D.Node a, DungeonPathfinder2D.Node b) =>
-        {
-            var pathCost = new DungeonPathfinder2D.PathCost();
-
-            pathCost.cost = Vector2Int.Distance(b.Position, endPos);    //heuristic
-
-            if (gridManager.grid[b.Position].isOccupied)
-            {
-                pathCost.cost += 100;
-            }
-
-            if (!gridManager.grid[b.Position].isValid)
-            {
-                pathCost.cost += 1000000;
-            }
-            if(gridManager.grid[b.Position].hasTail)
-            {
-                int index = tails.IndexOf(gridManager.grid[b.Position].tail) + 1;
-                pathCost.cost += (tails.Count * 50) / index;
-            }
-
-            if (gridManager.grid[b.Position].state == Cell.CellState.Wall)
-            {
-                pathCost.cost += 10;
-            }
-            else if (gridManager.grid[b.Position].state == Cell.CellState.Obstacle)
-            {
-                pathCost.cost += 5;
-            }
-            else if (gridManager.grid[b.Position].state == Cell.CellState.None)
-            {
-                pathCost.cost += 1;
-            }
-
-            pathCost.traversable = true;
-
-            gridManager.grid[b.Position].cost = (int) pathCost.cost;
-
-            return pathCost;
-        });
-
-        lastPath = path; // Store the path for Gizmos
-
-        if (path != null)
-            {
-                for (int i = 0; i < path.Count; i++)
-                {
-                    var current = path[i];
-
-                    if (gridManager.grid[current].state == Cell.CellState.None)
-                    {
-                        gridManager.grid[current].state = Cell.CellState.Path;
-                    }
-
-                    if (i > 0)
-                    {
-                        var prev = path[i - 1];
-
-                        var delta = current - prev;
-                    }
-                }
-            }
-        
-    }
-
-    private void OnDrawGizmos()
-    {
-        if (lastPath == null || gridManager == null)
-            return;
-
-        Gizmos.color = Color.black;
-        for (int i = 1; i < lastPath.Count; i++)
-        {
-            Vector3 from = gridManager.grid[lastPath[i - 1]].position + new Vector3(0, 0.2f, 0);
-            Vector3 to = gridManager.grid[lastPath[i]].position + new Vector3(0, 0.2f, 0);
-            Gizmos.DrawLine(from, to);
-            Gizmos.DrawSphere(from, 0.1f);
-        }
-        // Draw last point
-        if (lastPath.Count > 0)
-        {
-            Vector3 last = gridManager.grid[lastPath[lastPath.Count - 1]].position + new Vector3(0, 0.2f, 0);
-            Gizmos.DrawSphere(last, 0.1f);
-        }
-    }
-
 
     private void OnTriggerEnter(Collider other)
     {
@@ -435,7 +325,6 @@ public class Snake : MonoBehaviour
 
     public void Eat()
     {
-        
         cumulativeReward += 5.0f;
         AddTail();
     }
@@ -461,19 +350,9 @@ public class Snake : MonoBehaviour
     }
 
 
-    // Keyboard input for manual control
+    // Keyboard input is handled in Update now
     private void FixedUpdate()
     {
-        int action = 0;
-        if (Keyboard.current.wKey.isPressed)
-            action = 1; // Move forward
-        else if (Keyboard.current.aKey.isPressed)
-            action = 2; // Rotate left
-        else if (Keyboard.current.dKey.isPressed)
-            action = 3; // Rotate right
-        else if (Keyboard.current.sKey.isPressed)
-            action = 4; // Move backward
-
-        //MoveAgent(action);
+        // Intentionally left empty
     }
 }
