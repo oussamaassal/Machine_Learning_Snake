@@ -93,7 +93,7 @@ public class Cell
 
         if(state == CellState.Path)
         {
-            cubeObject.GetComponent<Renderer>().material.color = Color.pink;
+            cubeObject.GetComponent<Renderer>().material.color = Color.yellow;
         }
 
         if(state == CellState.LastTail)
